@@ -2,6 +2,7 @@
 const color_green = new cv.Scalar(35, 255, 15, 255);
 const color_red = new cv.Scalar(255, 15, 15, 255);
 const ratio_tolerance = 1.0;
+const match_tolerance = 50;
 let src_image = null;
 let dst_image = null;
 let templatesData = []; // name, keypoints, descriptors, rows, cols
@@ -48,7 +49,7 @@ function loadInputImage(event){
             };
         };
         reader.readAsDataURL(file);
-        psConsoleLog("LOADING...");
+        psConsoleLog("Input Image Loaded.");
         document.getElementById("findCoins").disabled = false;
         document.getElementById("processBtn").disabled = false;
     } else {
@@ -178,7 +179,7 @@ function processBills(boundingBoxes) {
             let filteredMatches = [];
             for (let i = 0; i < matches.size(); i++) {
                 let match = matches.get(i);
-                if (match.distance < 50) {
+                if (match.distance < match_tolerance) {
                     filteredMatches.push(match);
                 }
             }
@@ -309,12 +310,20 @@ function findCoins(src){
 }
 // Wrapper function for the Find Coins buttton
 function findCoinsBtn(){
+    if(!src_image){
+        psConsoleLog("NO SOURCE IMAGE");
+        return;
+    }
     psConsoleLog("Looking for COINS. Please Wait...");
     findCoins(src_image);
     displayOutput();
 }
 // Wrapper function for Process Image button
 function processImage(){
+    if(!src_image){
+        psConsoleLog("NO SOURCE IMAGE");
+        return;
+    }
     let bounding_boxes = detectBills(src_image);
     processBills(bounding_boxes);
     displayOutput();
