@@ -1,6 +1,7 @@
 # Currency Scanner
 ## Computational Vision Final Project
 ### [✰ LINK TO PROJECT SITE](https://zaarafa.github.io/Currency-Scanner/)
+![](https://i.imgur.com/ssMZHuL.png)
 
 ### How to Use:
 - Wait for a second to allow OpenCV to load
@@ -35,6 +36,5 @@ The brick and mortar shopping experience is being increasingly digitized, tap to
 
 
 ### Images:
-![](https://i.imgur.com/FZboyQJ.png)
 ![](https://i.imgur.com/YIjO8CU.png)
 ![](https://i.imgur.com/JFwmMs2.png)
