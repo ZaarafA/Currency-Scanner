@@ -1,8 +1,11 @@
 // GLOBAL VARIABLES
 const color_green = new cv.Scalar(35, 255, 15, 255);
 const color_red = new cv.Scalar(255, 15, 15, 255);
+
 const ratio_tolerance = 1.0;
-const match_tolerance = 50;
+const distance_tolerance = 50;
+const match_tolerance = 15;
+
 let src_image = null;
 let dst_image = null;
 let templatesData = []; // name, keypoints, descriptors, rows, cols
@@ -31,23 +34,29 @@ function loadInputImage(event){
         // read image file and load it into imgElement
         const reader = new FileReader();
         reader.onload = function(e) {
+            const inputImageDiv = document.querySelector('.inputImageDiv');
+            inputImageDiv.innerHTML = '';
             const imgElement = document.createElement('img');
             imgElement.src = e.target.result;
             imgElement.style.maxWidth = '100%';
             imgElement.style.maxHeight = '100%';
-            
-            // show imgElement in InputImage section
-            imgElement.onload = () => {
-                const inputImageDiv = document.querySelector('.inputImageDiv');
-                inputImageDiv.innerHTML = '';
-                inputImageDiv.appendChild(imgElement);
-                src_image = cv.imread(imgElement);
-                dst_image = src_image.clone();
-
-                // ======== Process Image ========
-                // processImage();
+            inputImageDiv.appendChild(imgElement);
+        
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                src_image = cv.imread(canvas);
+                dst_image = src_image.clone(); 
             };
+        
+            document.getElementById("processBtn").disabled = false;
         };
+        
         reader.readAsDataURL(file);
         psConsoleLog("Input Image Loaded.");
         document.getElementById("findCoins").disabled = false;
@@ -118,33 +127,16 @@ function detectBills(image) {
 
         // Match aspect ratio with a dollar bill
         let aspectRatio = Math.max(rect.width, rect.height) / Math.min(rect.width, rect.height);
-        if (aspectRatio >= 2.5 - ratio_tolerance && aspectRatio <= 2.5 + ratio_tolerance && rect.width > 50 && rect.height > 50) {
+        if (aspectRatio >= 2.5 - ratio_tolerance && aspectRatio <= 2.5 + ratio_tolerance && rect.width > 150 && rect.height > 150) {
             boundingBoxes.push(rect);
         }
     }
-    // fix overlapping boxes -> there's probably a better way to do this but this works enough
-    let finalBoxes = [];
-    for(let i = 0; i < boundingBoxes.length; i++){
-        let keep = true;
-        // Check if box i is inside box j -> push the ones that are fine
-        for(let j = 0; j < boundingBoxes.length; j++) {
-            if (i === j){ continue; }
-            if (
-                boundingBoxes[i].x >= boundingBoxes[j].x && boundingBoxes[i].y >= boundingBoxes[j].y &&
-                boundingBoxes[i].x + boundingBoxes[i].width <= boundingBoxes[j].x + boundingBoxes[j].width &&
-                boundingBoxes[i].y + boundingBoxes[i].height <= boundingBoxes[j].y + boundingBoxes[j].height
-            ) {
-                keep = false;
-                break;
-            }
-        } if (keep){
-            finalBoxes.push(boundingBoxes[i]);
-        }
-    }
+    // fix overlapping boxes
+    let finalBoxes = nonMaxSuppression(boundingBoxes, 0.5);
 
     // Draw bounding boxes
     for (let box of finalBoxes) {
-        cv.rectangle(resultMat,new cv.Point(box.x, box.y),new cv.Point(box.x + box.width, box.y + box.height),color_green,2);
+        cv.rectangle(resultMat,new cv.Point(box.x, box.y),new cv.Point(box.x + box.width, box.y + box.height),color_green,8);
     }
 
     temp.delete();
@@ -179,7 +171,7 @@ function processBills(boundingBoxes) {
             let filteredMatches = [];
             for (let i = 0; i < matches.size(); i++) {
                 let match = matches.get(i);
-                if (match.distance < match_tolerance) {
+                if (match.distance < distance_tolerance) {
                     filteredMatches.push(match);
                 }
             }
@@ -189,18 +181,23 @@ function processBills(boundingBoxes) {
 
             matches.delete();
         });
+        // discard bills with too few good matches
+        if(leadingTemplate[1] < match_tolerance){
+            leadingTemplate[0] = null;
+        }
 
+        // ======= Label and Store Bill =======
         if (leadingTemplate[0] !== null) {
-            psConsoleLog(`Bill at (${box.x}, ${box.y}) matched: ${leadingTemplate[0]} with ${leadingTemplate[1]} matches`);
+            psConsoleLog(`Bill at (${box.x}, ${box.y}) matched: ${leadingTemplate[0]} w/ ${leadingTemplate[1]} matches`);
             bills.push(parseInt(leadingTemplate[0].replace('_imgEl','')));
 
             // label bill with prediction
-            let txt_position = new cv.Point(box.x + 10, box.y + 20);
+            let txt_position = new cv.Point(box.x+20, box.y+60);
             let txt_label = leadingTemplate[0].replace('_imgEl', ' Dollar Bill'); 
-            cv.putText(dst_image, txt_label, txt_position, cv.FONT_HERSHEY_DUPLEX, 0.75, new cv.Scalar(0, 0, 0, 255), 3);
-            cv.putText(dst_image, txt_label, txt_position, cv.FONT_HERSHEY_DUPLEX, 0.75, new cv.Scalar(255, 255, 255, 255), 1);
+            cv.putText(dst_image, txt_label, txt_position, cv.FONT_HERSHEY_DUPLEX, 3, new cv.Scalar(0, 0, 0, 255), 12);
+            cv.putText(dst_image, txt_label, txt_position, cv.FONT_HERSHEY_DUPLEX, 3, new cv.Scalar(255, 255, 255, 255), 3);
         } else {
-            console.log(`Bill at (${box.x}, ${box.y}) had no matches`);
+            psConsoleLog(`Bill at (${box.x}, ${box.y}) discarded`);
         }
 
         roi.delete();
@@ -324,7 +321,76 @@ function processImage(){
         psConsoleLog("NO SOURCE IMAGE");
         return;
     }
-    let bounding_boxes = detectBills(src_image);
-    processBills(bounding_boxes);
-    displayOutput();
+    psConsoleLog("PROCESSING...PLEASE WAIT...");
+
+    try{
+        let bounding_boxes = detectBills(src_image);
+        processBills(bounding_boxes);
+        displayOutput();
+    } catch (error) {
+        console.error("Error in Processing: ", error);
+        alert("ERROR: Please Try Again.");
+        location.reload();
+    }
+    
+}
+
+// Intersection over Union of two boxes
+// how much of the relative area of two boxes overlap
+function iou(boxA, boxB){
+    // coordinates of the intersection
+    let xA = Math.max(boxA.x, boxB.x);
+    let yA = Math.max(boxA.y, boxB.y);
+    let xB = Math.min(boxA.x + boxA.width, boxB.x + boxB.width);
+    let yB = Math.min(boxA.y + boxA.height, boxB.y + boxB.height);
+
+    // intersection area
+    let interWidth = Math.max(0, xB - xA);
+    let interHeight = Math.max(0, yB - yA);
+    let interArea = interWidth * interHeight;
+    // overlap area
+    let boxAArea = boxA.width * boxA.height;
+    let boxBArea = boxB.width * boxB.height;
+
+    let unionArea = boxAArea + boxBArea - interArea;
+    if (unionArea === 0){
+        return 0;
+    }
+    return interArea / unionArea; // ratio of overlap
+}
+// NonMaxSuppression (opencv.js doesn't have this build in apparently)
+// Get the largest boxes and check how much overlap there are betwn them
+function nonMaxSuppression(boxes, iouThreshold = 0.5) {
+    boxes.sort((a, b) => (b.width * b.height) - (a.width * a.height));
+    let finalBoxes = [];
+    for (let i = 0; i < boxes.length; i++) {
+        let currentBox = boxes[i];
+        let keep = true;
+
+        for (let j = 0; j < finalBoxes.length; j++) {
+            let existingBox = finalBoxes[j];
+            let iouValue = iou(currentBox, existingBox); // overlap
+
+            // calculate intersection box coordinates 
+            let xA = Math.max(currentBox.x, existingBox.x);
+            let yA = Math.max(currentBox.y, existingBox.y);
+            let xB = Math.min(currentBox.x + currentBox.width, existingBox.x + existingBox.width);
+            let yB = Math.min(currentBox.y + currentBox.height, existingBox.y + existingBox.height);
+            // intersection area
+            let interArea = Math.max(0, xB - xA) * Math.max(0, yB - yA);
+
+            let currentBoxArea = currentBox.width * currentBox.height;
+            let existingBoxArea = existingBox.width * existingBox.height;
+
+            // intersection ratio is too high or one box is fully inside the other
+            if (iouValue > iouThreshold || interArea === currentBoxArea || interArea === existingBoxArea) {
+                keep = false;
+                break;
+            }
+        } if (keep) {
+            finalBoxes.push(currentBox);
+        }
+    }
+
+    return finalBoxes;
 }

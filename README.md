@@ -18,7 +18,7 @@ The brick and mortar shopping experience is being increasingly digitized, tap to
 - When a file is selected, the image bills are located:
   - Preprocessing: Grayscale, Gaussian blur
   - Edge Detection and Amplification: using Canny and Dilation
-  - Non-overlapping Rectangular countours, that match a bill's aspect ratio, are picked out
+  - Intersection over Union and NonMax Suppression are used to filter (most) overlapping rectangles
   - A bounding box is drawn over potential bills
 - Using those boundaries, bills are identified
   - The keypoints/descriptors are extracted from each bill region
@@ -28,10 +28,11 @@ The brick and mortar shopping experience is being increasingly digitized, tap to
 - Using the list of bills identified, the total value is summed and a labelled image is displayed
 
 ### Limitations:
-- Finding Coins: Trying to Find Coins in an image that has no coins is *really* slow. As such, it's not done by default. The function doesn't handle a mixture of bills and coins very well because of the false positives, such as the emblem on every bill.
+- Accuracy: From testing, there's a 90% accuracy rate. However it infrequently produces inconsistent results when the same input image is run by it again. 
+- Finding Coins: I got it mostly working but the fine grain details made me remove it in the final version. While it worked perfectly for simple images of coins, it became exponentially slower and less reliable with more elements added to the image. I decided to remove it for being out of scope. The functions are still in the code for posterity.
 - Occlusion/Overlap: Occluded bills aren't counted. The classification function *can* identify them, however I only look in a bounded box around rectangular bills.
 - Skew: The program can handle only up to ~30° of camera or image tilt.
-- Accuracy: It is 90% accurate, but there are outliers where the same input image will produce different results at random when run again.
+
 
 ### Images:
 ![](https://i.imgur.com/22auRBW.png)
