@@ -46,6 +46,9 @@
     border-radius: 5px;
     transition: transform 0.3s ease;
 }
+.processBtn, .inputBtn{
+    font-weight: bold;
+}
 .btn:hover{
     transform: scale(1.05);
 }
@@ -66,11 +69,13 @@
 .infoMenu {
     background-color: var(--blue0);
     width: 250px;
-    padding: 20px;
+    padding: 10px;
     color:wheat;
+    flex-shrink: 0.1;
 }
 #psconsole{
     overflow: scroll;
+    overflow-x: hidden;
 }
 
 .mainPanel {
