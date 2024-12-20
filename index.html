@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Scanner</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://docs.opencv.org/4.10.0/opencv.js"></script>
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="buttons">
+                <button class="inputBtn btn" id="InputBtn" onclick="document.getElementById('fileInput').click()" disabled>Select Input Image</button>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="loadInputImage(event)">
+                <button id="processBtn" class="processBtn btn" onclick="processImage()" disabled>PROCESS BILLS</button>
+                <button class="testbtn" onclick="test()" hidden>TEST</button>
+                <button id="findCoins" class="findCoins btn" onclick="findCoinsBtn()" disabled>Find Coins</button>
+            </div>
+            <h1 class="title">Currency Scanner</h1>
+        </div>
+        <div class="content">
+            <!-- Side Bar -->
+            <div class="infoMenu">
+                <h2>How to Use:</h2>
+                <p>- Wait for a second to allow OpenCV and the templates to load <br> - Select an Input Image Containing Bills <br> - The program should then load a labelled output image and update the tracker below <br> - Note: If you open the Browser Console, you can see more details about the process.</p>
+                <br> <br>
+                <h2>Logs:</h2>
+                <p id="psconsole"></p>
+            </div>
+            <div class="mainPanel">
+                <!-- Center Display Panels -->
+                <div class="displays">
+                    <div class="inputImageDiv"></div>
+                    <div class="outputImageDiv"></div>
+                </div>
+                <!-- Text Output Panel -->
+                <div class="bottomPanel">
+                    <h2 id="total">Total: $00.00</h2>
+                    <p id="counts">List of bills that exist in the picture...</p>
+                </div>
+            </div>
+        </div>
+        <!-- Hidden img elements for OpenCV to see local files -->
+        <div class="templates" hidden>
+            <img src="templates/1.png" class="template" id="1_imgEl" alt="">
+            <img src="templates/5.png" class="template" id="5_imgEl" alt="">
+            <img src="templates/10.png" class="template" id="10_imgEl" alt="">
+            <img src="templates/20.png" class="template" id="20_imgEl" alt="">
+            <img src="templates/50.png" class="template" id="50_imgEl" alt="">
+            <img src="templates/100.png" class="template" id="100_imgEl" alt="">
+        </div>
+    </div>
+</body>
+</html>
