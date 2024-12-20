@@ -7,7 +7,7 @@
 - Click on "Select Input Image" and choose an image file to process
 - Once the image is loaded, click "PROCESS BILLS" to see the output
 
-Note: Bringing up the Browser Console provides more information on the process. Running this from the website is recommended. If you want to run this locally, you'd have to run it from a local HTTPS web server.
+Note: Bringing up the Browser Console provides more information on the process. Running this from the website is recommended. Due to browser security settings, if you want to run this locally, you'd have to run it from a local HTTPS web server.
 
 ### Motivation:
 The brick and mortar shopping experience is being increasingly digitized, tap to pay, card, chip, partly in the name of speeding up the transaction. A vision system could address the speed bottleneck that cash payments present, by identifying the types and values of bills in an image. This could also be used for Asset Protection to ensure the amount of money passing through a counter matches the amount that ended up in the register.
