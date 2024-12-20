@@ -1,4 +1,4 @@
-// GLOBAL VARIABLES
+// ======= GLOBAL VARIABLES ======
 const color_green = new cv.Scalar(35, 255, 15, 255);
 const color_red = new cv.Scalar(255, 15, 15, 255);
 
@@ -12,6 +12,7 @@ let templatesData = []; // name, keypoints, descriptors, rows, cols
 let psConsole, total_el, counts_el;
 let bills = [];
 
+// ======= Set Up =======
 // On OpenCV Load
 cv.onRuntimeInitialized = () => {
     console.log("OpenCV.js is ready.");
@@ -42,6 +43,7 @@ function loadInputImage(event){
             imgElement.style.maxHeight = '100%';
             inputImageDiv.appendChild(imgElement);
         
+            // load image from file directly then into a Mat from canvas
             const img = new Image();
             img.src = e.target.result;
             img.onload = () => {
@@ -53,32 +55,28 @@ function loadInputImage(event){
                 src_image = cv.imread(canvas);
                 dst_image = src_image.clone(); 
             };
-        
-            document.getElementById("processBtn").disabled = false;
         };
         
         reader.readAsDataURL(file);
         psConsoleLog("Input Image Loaded.");
-        document.getElementById("findCoins").disabled = false;
         document.getElementById("processBtn").disabled = false;
     } else {
         alert('Please select an image.');
     }
 }
 
+// ============== Processing ==============
 // Load Templates, Extract Keypoints and Descriptors, Fill out templatesData 
 function processTemplates(){
     console.log("Template Processing Started");
-    let templatesMat = []; // grayscale template mats
     let templatesEl = ["1_imgEl","5_imgEl","10_imgEl","20_imgEl","50_imgEl","100_imgEl"];
-    let orb = new cv.ORB(1500);
+    let orb = new cv.ORB(1000);
 
     // for each template, load the keypoints into an array of template objects
     templatesEl.forEach(item => {
         // read and convert to grayscale
         let temp = cv.imread(item);
         cv.cvtColor(temp, temp, cv.COLOR_RGBA2GRAY);
-        templatesMat.push(temp);
         console.log(`Template Loaded: ${item}`);
 
         // extract keypoints and descriptors
@@ -100,7 +98,7 @@ function processTemplates(){
     orb.delete();
 }
 
-// takes image, returns bounding boxes, post: draws them over dst_image
+// takes image, returns bounding boxes, @post: draws them over dst_image
 function detectBills(image) {
     let resultMat = image.clone();
     let temp = new cv.Mat();
@@ -125,18 +123,18 @@ function detectBills(image) {
         const contour = contours.get(i);
         let rect = cv.boundingRect(contour);
 
-        // Match aspect ratio with a dollar bill
+        // Match aspect ratio with a dollar bill's. Discard really small matches
         let aspectRatio = Math.max(rect.width, rect.height) / Math.min(rect.width, rect.height);
-        if (aspectRatio >= 2.5 - ratio_tolerance && aspectRatio <= 2.5 + ratio_tolerance && rect.width > 150 && rect.height > 150) {
+        if (aspectRatio >= 2.5 - ratio_tolerance && aspectRatio <= 2.5 + ratio_tolerance && rect.width > 100 && rect.height > 100) {
             boundingBoxes.push(rect);
         }
     }
-    // fix overlapping boxes
+    // fix overlapping boxes with nms
     let finalBoxes = nonMaxSuppression(boundingBoxes, 0.5);
 
     // Draw bounding boxes
     for (let box of finalBoxes) {
-        cv.rectangle(resultMat,new cv.Point(box.x, box.y),new cv.Point(box.x + box.width, box.y + box.height),color_green,8);
+        cv.rectangle(resultMat,new cv.Point(box.x, box.y),new cv.Point(box.x + box.width, box.y + box.height),color_green,12);
     }
 
     temp.delete();
@@ -146,11 +144,14 @@ function detectBills(image) {
 
     psConsoleLog(`FOUND ${finalBoxes.length} BILLS`);
     dst_image = resultMat.clone();
+    resultMat.delete();
     return finalBoxes;
 }
 
 // Given an array of bill locations, find which template matches the bill, and label each 
 function processBills(boundingBoxes) {
+    bills = [];
+    
     let orb = new cv.ORB(1000);
     let bfMatcher = new cv.BFMatcher(cv.NORM_HAMMING, true);
 
@@ -194,8 +195,8 @@ function processBills(boundingBoxes) {
             // label bill with prediction
             let txt_position = new cv.Point(box.x+20, box.y+60);
             let txt_label = leadingTemplate[0].replace('_imgEl', ' Dollar Bill'); 
-            cv.putText(dst_image, txt_label, txt_position, cv.FONT_HERSHEY_DUPLEX, 3, new cv.Scalar(0, 0, 0, 255), 12);
-            cv.putText(dst_image, txt_label, txt_position, cv.FONT_HERSHEY_DUPLEX, 3, new cv.Scalar(255, 255, 255, 255), 3);
+            cv.putText(dst_image, txt_label, txt_position, cv.FONT_HERSHEY_DUPLEX, 3, new cv.Scalar(0, 0, 0, 255), 18);
+            cv.putText(dst_image, txt_label, txt_position, cv.FONT_HERSHEY_DUPLEX, 3, new cv.Scalar(255, 255, 255, 255), 5);
         } else {
             psConsoleLog(`Bill at (${box.x}, ${box.y}) discarded`);
         }
@@ -230,99 +231,21 @@ function calculateTotal(){
     bills.forEach(bill => counts_el.innerHTML += `$${bill} Bill, `);
 }
 
+// ============== Helper Functions ==============
 // Pseudo-Console Log: Displaying Console Logs on screen just for easier visibility
 function psConsoleLog(text){
     console.log(text);
     psConsole.innerHTML += `- ${text}<br>`;
 }
 
-function test() {
-    const imgElement = document.createElement('img');
-    imgElement.src = '20241208_003528.jpg';
-    imgElement.style.maxWidth = '100%';
-    imgElement.style.maxHeight = '100%';
-
-    imgElement.onload = () => {
-        const inputImageDiv = document.querySelector('.inputImageDiv');
-        inputImageDiv.innerHTML = '';
-        inputImageDiv.appendChild(imgElement);
-
-        let temp = cv.imread(imgElement);
-        dst_image = temp.clone();
-        findCoins(temp);
-
-        const outputImageDiv = document.querySelector('.outputImageDiv');
-        outputImageDiv.innerHTML = '';
-        const canvas = document.createElement('canvas');
-        canvas.width = dst_image.cols;
-        canvas.height = dst_image.rows;
-        outputImageDiv.appendChild(canvas);
-        cv.imshow(canvas, dst_image);
-
-        temp.delete();
-        dst_image.delete();
-    };
-}
-
-// Coins the number of circles in the scene -> Really Slow
-function findCoins(src){
-    psConsoleLog("Detecting Coins");
-    // preprocess
-    let temp = src.clone();
-    cv.cvtColor(temp, temp, cv.COLOR_RGBA2GRAY);
-    cv.GaussianBlur(temp, temp, new cv.Size(9, 9), 2, 2);
-    // find circles
-    let circles = new cv.Mat();
-    cv.HoughCircles(temp, circles, cv.HOUGH_GRADIENT, 1, 30, 150, 20, 10, temp.rows/3);
-
-    if(circles.cols == 0){
-        psConsoleLog("No Coins Found");
-        temp.delete();
-        circles.delete();
-        return;
-    }
-    // store the coins centre and radius. Return if it struggles and finds > 50
-    let coinPositions = []; // (x, y, r)
-    for (let i = 0; i < circles.cols; i++) {
-        let x = circles.data32F[i * 3];
-        let y = circles.data32F[i * 3 + 1];
-        let r = circles.data32F[i * 3 + 2];
-
-        coinPositions.push({ x: x, y: y, r: r });
-        if(coinPositions.length > 50){
-            psConsoleLog("No Valid Coins found");
-            temp.delete();
-            circles.delete();
-            return;
-        }
-    }
-    // draw coin on dst_image
-    for (let coin of coinPositions) {
-        cv.circle(dst_image, new cv.Point(Math.round(coin.x), Math.round(coin.y)), Math.round(coin.r), color_green, 1.5);
-    }
-    counts_el.innerHTML += `<br> Found ${coinPositions.length} Coins`;
-    psConsoleLog(`Found ${coinPositions.length} Coins`);
-    temp.delete();
-    circles.delete();
-}
-// Wrapper function for the Find Coins buttton
-function findCoinsBtn(){
-    if(!src_image){
-        psConsoleLog("NO SOURCE IMAGE");
-        return;
-    }
-    psConsoleLog("Looking for COINS. Please Wait...");
-    findCoins(src_image);
-    displayOutput();
-}
 // Wrapper function for Process Image button
 function processImage(){
+    psConsoleLog("PROCESSING...PLEASE WAIT...");
     if(!src_image){
         psConsoleLog("NO SOURCE IMAGE");
         return;
     }
-    psConsoleLog("PROCESSING...PLEASE WAIT...");
-
+    // if there's an error in processing, refresh the page
     try{
         let bounding_boxes = detectBills(src_image);
         processBills(bounding_boxes);
@@ -352,7 +275,7 @@ function iou(boxA, boxB){
     let boxAArea = boxA.width * boxA.height;
     let boxBArea = boxB.width * boxB.height;
 
-    let unionArea = boxAArea + boxBArea - interArea;
+    let unionArea = boxAArea + boxBArea - interArea; // avoid double counting
     if (unionArea === 0){
         return 0;
     }
@@ -361,6 +284,7 @@ function iou(boxA, boxB){
 // NonMaxSuppression (opencv.js doesn't have this build in apparently)
 // Get the largest boxes and check how much overlap there are betwn them
 function nonMaxSuppression(boxes, iouThreshold = 0.5) {
+    // sort by size cause a box can only fit inside a bigger box
     boxes.sort((a, b) => (b.width * b.height) - (a.width * a.height));
     let finalBoxes = [];
     for (let i = 0; i < boxes.length; i++) {

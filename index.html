@@ -16,8 +16,6 @@
                 <button class="inputBtn btn" id="InputBtn" onclick="document.getElementById('fileInput').click()" disabled>Select Input Image</button>
                 <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="loadInputImage(event)">
                 <button id="processBtn" class="processBtn btn" onclick="processImage()" disabled>PROCESS BILLS</button>
-                <button class="testbtn" onclick="test()" hidden>TEST</button>
-                <button id="findCoins" class="findCoins btn" onclick="findCoinsBtn()" hidden disabled>Find Coins</button>
             </div>
             <h1 class="title">Currency Scanner</h1>
         </div>
@@ -27,7 +25,7 @@
                 <h2>How to Use:</h2>
                 <p>- Wait for a second to allow OpenCV and the templates to load 
                     <br> - Select an Input Image Containing Bills or Coins
-                    <br> - Then click "PROCESS BILLS" to run the program 
+                    <br> - Then click "PROCESS BILLS" to run the program. Processing might take a moment.
                     <br> - Note: If you open the Browser Console, you can see more details about the process.
                 </p>
                 <br> <br>

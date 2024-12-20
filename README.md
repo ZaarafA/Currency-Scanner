@@ -5,7 +5,7 @@
 ### How to Use:
 - Wait for a second to allow OpenCV to load
 - Click on "Select Input Image" and choose an image file to process
-- Once the image is loaded, click "PROCESS BILLS" to see the output
+- Once the image is loaded, click "PROCESS BILLS" to see the output. Processing might take a moment depending on how many bills are in the scene.
 
 Note: Bringing up the Browser Console provides more information on the process. Running this from the website is recommended. Due to browser security settings, if you want to run this locally, you'd have to run it from a local HTTPS web server.
 
@@ -28,13 +28,13 @@ The brick and mortar shopping experience is being increasingly digitized, tap to
 - Using the list of bills identified, the total value is summed and a labelled image is displayed
 
 ### Limitations:
-- Accuracy: From testing, there's a 90% accuracy rate. However it infrequently produces inconsistent results when the same input image is run by it again. 
-- Finding Coins: I got it mostly working but the fine grain details made me remove it in the final version. While it worked perfectly for simple images of coins, it became exponentially slower and less reliable with more elements added to the image. I decided to remove it for being out of scope. The functions are still in the code for posterity.
+- Accuracy: From testing, there's a 95% accuracy rate under ideal conditions. It can infrequently produce inconsistent results when the same input image is run by it again. 
+- Finding Coins: I got it mostly working but the fine grain details made me remove it in the final version. While it worked perfectly for simple images of coins, it became exponentially slower and less reliable the more elements added to the image. I decided it was more important to do one thing perfectly than two things alright.
 - Occlusion/Overlap: Occluded bills aren't counted. The classification function *can* identify them, however I only look in a bounded box around rectangular bills.
 - Skew: The program can handle only up to ~30° of camera or image tilt.
 
 
 ### Images:
-![](https://i.imgur.com/22auRBW.png)
-![](https://i.imgur.com/YbSnZQ8.png)
-![](https://i.imgur.com/gv6nr7m.png)
+![](https://i.imgur.com/FZboyQJ.png)
+![](https://i.imgur.com/YIjO8CU.png)
+![](https://i.imgur.com/JFwmMs2.png)
