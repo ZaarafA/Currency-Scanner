@@ -10,7 +10,7 @@
 - Click on "Select Input Image" and choose an image file to process
 - Once the image is loaded, click "PROCESS BILLS" to see the output. Processing might take a moment depending on how many bills are in the scene.
 
-Note: Bringing up the Browser Console provides more information on the process. 
+Note: If "Select Input Image" still remains grey after a few seconds, refresh the page. Additionally, Bringing up the Browser Console provides more information about the image processing.  
 
 *** Running this from the website is recommended. Due to browser security settings, if you want to run this locally, you'd have to run it from a local HTTPS web server.
 
