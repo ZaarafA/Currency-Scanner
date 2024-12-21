@@ -98,7 +98,8 @@ function processTemplates(){
     orb.delete();
 }
 
-// takes image, returns bounding boxes, @post: draws them over dst_image
+// takes in image @return bounding boxes around potential bills 
+// @post: draws bounding boxes over dst_image
 function detectBills(image) {
     let resultMat = image.clone();
     let temp = new cv.Mat();
@@ -149,6 +150,7 @@ function detectBills(image) {
 }
 
 // Given an array of bill locations, find which template matches the bill, and label each 
+// @post labels dst_image with the class of bill
 function processBills(boundingBoxes) {
     bills = [];
     
@@ -252,7 +254,7 @@ function processImage(){
         displayOutput();
     } catch (error) {
         console.error("Error in Processing: ", error);
-        alert("ERROR: Please Try Again.");
+        alert("LOADING ERROR: Please Try Again.");
         location.reload();
     }
     
