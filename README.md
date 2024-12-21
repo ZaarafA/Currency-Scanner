@@ -2,9 +2,10 @@
 ## Computational Vision Final Project
 ### [✰ LINK TO PROJECT SITE](https://zaarafa.github.io/Currency-Scanner/)
 ### [✰ LINK TO GITHUB REPO](https://github.com/ZaarafA/Currency-Scanner)
-![](https://i.imgur.com/ssMZHuL.png)
+![Example Use Image 1](https://i.imgur.com/ssMZHuL.png)
 
 ### How to Use:
+- Open the Project Website linked above ( Test images are on the Github Repo )
 - Wait for a second to allow OpenCV and the templates to load in
 - Click on "Select Input Image" and choose an image file to process
 - Once the image is loaded, click "PROCESS BILLS" to see the output. Processing might take a moment depending on how many bills are in the scene.
@@ -39,7 +40,7 @@ The brick and mortar shopping experience is being increasingly digitized, tap to
 
 
 ### Images:
-![](https://i.imgur.com/YIjO8CU.png)
-![](https://i.imgur.com/JFwmMs2.png)
+![Example Use Image 2](https://i.imgur.com/YIjO8CU.png)
+![Example Use Image 3](https://i.imgur.com/JFwmMs2.png)
 ### [Usage Video](https://youtu.be/asrFWLCDb6o):
-![](https://i.imgur.com/JLod8dp.gif)
+![Usage Gif](https://i.imgur.com/JLod8dp.gif)
