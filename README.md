@@ -1,6 +1,7 @@
 # Currency Scanner
 ## Computational Vision Final Project
 ### [✰ LINK TO PROJECT SITE](https://zaarafa.github.io/Currency-Scanner/)
+### [✰ LINK TO GITHUB REPO](https://github.com/ZaarafA/Currency-Scanner)
 ![](https://i.imgur.com/ssMZHuL.png)
 
 ### How to Use:
