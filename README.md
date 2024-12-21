@@ -39,3 +39,5 @@ The brick and mortar shopping experience is being increasingly digitized, tap to
 ### Images:
 ![](https://i.imgur.com/YIjO8CU.png)
 ![](https://i.imgur.com/JFwmMs2.png)
+### Usage Video:
+![](https://i.imgur.com/JLod8dp.gif)
