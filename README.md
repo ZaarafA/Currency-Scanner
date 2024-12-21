@@ -30,7 +30,7 @@ The brick and mortar shopping experience is being increasingly digitized, tap to
 - Using the list of bills identified, the total value is summed and a labelled image is displayed
 
 ### Limitations:
-- Accuracy: From testing, there's a 95% accuracy rate under ideal conditions. It can infrequently produce inconsistent results when the same input image is run by it again. 
+- Accuracy: From testing, there's a 95% accuracy rate under ideal conditions. It infrequently produces a memory overflow error when processing images. The program handles those errors by refreshing the page.
 - Finding Coins: I got it mostly working but the fine grain details made me remove it in the final version. While it worked perfectly for simple images of coins, it became exponentially slower and less reliable the more elements added to the image. I decided it was more important to do one thing perfectly than two things alright.
 - Occlusion/Overlap: Occluded bills aren't counted. The classification function *can* identify them, however I only look in a bounded box around rectangular bills.
 - Skew: The program can handle only up to ~30° of camera or image tilt.
